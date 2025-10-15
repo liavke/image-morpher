@@ -7,6 +7,19 @@ import dnnlib
 from time import perf_counter
 import legacy
 
+def invert_image_with_script(image_path, network_path, outdir, num_steps=50):
+    subprocess.run([
+        "python", "stylegan2-ada-pytorch/projector.py",
+        "--target", image_path,
+        "--network", network_path,
+        "--outdir", outdir,
+        "--num-steps", str(num_steps)
+    ], check=True)
+    # After this runs, load the npz
+    latents = np.load(f"{outdir}/projected_w.npz")
+    w = torch.from_numpy(latents["w"]).unsqueeze(0)  # adjust shape as needed
+    return w
+
 def resize(img:Image):
     resized = img.resize((250,250), Image.Resampling.BILINEAR)
     #todo: recenter image
